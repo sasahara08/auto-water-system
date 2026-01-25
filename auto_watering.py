@@ -108,7 +108,7 @@ relay_request = gpiod.request_lines(
 i2c = busio.I2C(board.SCL, board.SDA)
 ads = ADS.ADS1115(i2c)
 # A0チャンネルを使う
-soil = AnalogIn(ads, ADS.P0)
+soil = AnalogIn(ads, 0)
 
 
 print("自動水やりシステム起動（ログ記録機能付き）")
