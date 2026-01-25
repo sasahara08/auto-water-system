@@ -43,11 +43,11 @@ def log_soil_data(message, value, voltage):
     # ディレクトリが存在しない場合は作成
     log_dir.mkdir(parents=True, exist_ok=True)
     
-    # ログファイル名: YYYY-MM-DD_HH-MM-SS.log
-    log_file = log_dir / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}.log"
+    # ログファイル名: YYYY-MM-DD.log（日付のみ）
+    log_file = log_dir / f"{now.strftime('%Y-%m-%d')}.log"
     
-    # ログエントリ
-    log_entry = f"10min Logs:{message}'---'{now.strftime('%Y-%m-%d %H:%M:%S')},raw={value},voltage={voltage:.3f}V\n"
+    # ログエントリ（日時を含む）
+    log_entry = f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {message} | raw={value}, voltage={voltage:.3f}V\n"
     
     # ファイルに追記
     with open(log_file, "a", encoding="utf-8") as f:
@@ -64,8 +64,8 @@ def log_error(error_type, error_message, traceback_str=""):
     log_dir = LOG_BASE_DIR / now.strftime("%Y") / now.strftime("%m")
     log_dir.mkdir(parents=True, exist_ok=True)
     
-    # エラーログファイル名: YYYY-MM-DD_HH-MM-SS_error.log
-    error_log_file = log_dir / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_error.log"
+    # エラーログファイル名: YYYY-MM-DD_error.log（日付のみ）
+    error_log_file = log_dir / f"{now.strftime('%Y-%m-%d')}_error.log"
     
     # エラーログエントリ
     error_entry = f"""{'='*60}
