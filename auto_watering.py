@@ -124,6 +124,7 @@ try:
             value = soil.value
             voltage = soil.voltage
             current_time = time.time()
+            has_water = 0
 
             print(f"土壌センサー: raw={value} voltage={voltage:.3f}V")
 
@@ -134,9 +135,22 @@ try:
             if value > DRY_THRESHOLD:
                 print("土壌が乾燥 -> ポンプON")
                 log_soil_data('土壌が乾燥', value, voltage)
+                # ポンプ動作後の湿度と比較するために、動作前に値を検証
+                before_run_pump_value = value
+
+                # ポンプ動作
                 relay_request.set_value(RELAY_GPIO, RELAY_ON)
                 time.sleep(PUMP_ON_SEC)
                 relay_request.set_value(RELAY_GPIO, RELAY_OFF)
+
+                # 水がポンプから送られたか確認をするために５秒待ち
+                print("水が浸透しているのを待っています。")
+                time.sleep(5)
+                # 最新のセンサー値を取得
+                after_run_pump_value = soil.value
+                # 水瓶に水が入っていない場合はエラーとして処理→システム停止
+                if before_run_pump_value >= after_run_pump_value:
+                    raise ValueError("水瓶に水が入っていない可能性があります。") 
 
                 print("ポンプOFF、給水後待機中")
                 time.sleep(WAIT_AFTER_WATER)
@@ -153,7 +167,16 @@ try:
             log_error("I/Oエラー", str(e), tb_str)
             print(f"I/Oエラー発生: {e}")
             print("エラーログに記録しました。システムを停止します。")
-            raise  # エラーを再送出して停止
+            raise
+
+        except ValueError as e:
+            # センサーやGPIOのエラー
+            import traceback
+            tb_str = traceback.format_exc()
+            log_error("水切れエラー", str(e), tb_str)
+            print(f"水切れエラー: {e}")
+            print("エラーログに記録しました。システムを停止します。")
+            raise
         
         except Exception as e:
             # その他の予期しないエラー
@@ -162,7 +185,7 @@ try:
             log_error(type(e).__name__, str(e), tb_str)
             print(f"エラー発生: {type(e).__name__}: {e}")
             print("エラーログに記録しました。システムを停止します。")
-            raise  # エラーを再送出して停止
+            raise
 
 except KeyboardInterrupt:
     print("\nユーザーによって停止されました")
