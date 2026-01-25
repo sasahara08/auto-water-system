@@ -88,7 +88,7 @@ def log_error(error_type, error_message, traceback_str=""):
 # GPIO 初期化（libgpiod V2）
 # =========================
 # V2では request_lines を使用
-GPIO_CHIP = "gpiochip0"
+GPIO_CHIP = "/dev/gpiochip0"
 
 relay_request = gpiod.request_lines(
     GPIO_CHIP,
