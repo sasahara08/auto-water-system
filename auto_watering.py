@@ -17,8 +17,8 @@ from adafruit_ads1x15.analog_in import AnalogIn
 
 DRY_THRESHOLD = 15000    # 乾燥判定しきい値
 PUMP_ON_SEC = 3          # ポンプ動作時間（秒）
-WAIT_AFTER_WATER = 5    # 給水後の待機時間（秒）
-LOOP_INTERVAL = 5        # 通常ループ間隔（秒）
+WAIT_AFTER_WATER = 1    # 給水後の待機時間（秒）
+LOOP_INTERVAL = 1        # 通常ループ間隔（秒）
 LOG_INTERVAL = 600       # ログ記録間隔（秒）
 
 # Low Level Trigger リレー用
