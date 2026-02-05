@@ -15,7 +15,7 @@ from adafruit_ads1x15.analog_in import AnalogIn
 # 設定値
 # =========================
 
-DRY_THRESHOLD = 16500    # 乾燥判定しきい値
+DRY_THRESHOLD = 16000    # 乾燥判定しきい値
 PUMP_ON_SEC = 20         # ポンプ動作時間（秒）
 WAIT_AFTER_WATER = 300    # 給水後の待機時間（秒）
 LOOP_INTERVAL = 3600        # 通常ループ間隔（秒）
