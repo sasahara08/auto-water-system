@@ -134,7 +134,7 @@ try:
                 if value > DRY_THRESHOLD:
                     print(f"ログ📙:土壌が乾燥しています------value:{value}")
                     log_soil_data("土壌が乾燥 -> ポンプON", value, voltage)
-                else
+                else:
                     print(f"ログ📙:土壌が湿っています------value:{value}")
                     log_soil_data("水やり不要", value, voltage)
 
