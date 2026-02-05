@@ -16,10 +16,10 @@ from adafruit_ads1x15.analog_in import AnalogIn
 # =========================
 
 DRY_THRESHOLD = 16000    # 乾燥判定しきい値
-PUMP_ON_SEC = 20         # ポンプ動作時間（秒）
+PUMP_ON_SEC = 3         # ポンプ動作時間（秒）
 WAIT_AFTER_WATER = 300    # 給水後の待機時間（秒）
-LOOP_INTERVAL = 3600        # 通常ループ間隔（秒）
-LOG_INTERVAL = 600       # ログ記録間隔（秒）
+LOOP_INTERVAL = 600        # 通常ループ間隔（秒）
+LOG_INTERVAL = 30       # ログ記録間隔（秒）
 
 # Low Level Trigger リレー用
 RELAY_GPIO = 4          # リレー制御GPIO（BCM番号）
@@ -131,10 +131,16 @@ try:
             # 10分ごとにログ記録
             if current_time - last_log_time >= LOG_INTERVAL:
                 last_log_time = current_time
+                if value > DRY_THRESHOLD:
+                    print(f"ログ📙:土壌が乾燥しています------value:{value}")
+                    log_soil_data("土壌が乾燥 -> ポンプON", value, voltage)
+                else
+                    print(f"ログ📙:土壌が湿っています------value:{value}")
+                    log_soil_data("水やり不要", value, voltage)
 
             if value > DRY_THRESHOLD:
                 print("土壌が乾燥 -> ポンプON")
-                log_soil_data('土壌が乾燥', value, voltage)
+                log_soil_data("土壌が乾燥 -> ポンプON", value, voltage)
                 # ポンプ動作後の湿度と比較するために、動作前に値を検証
                 before_run_pump_value = value
 
@@ -150,6 +156,8 @@ try:
                 after_run_pump_value = soil.value
                 # 水瓶に水が入っていない場合はエラーとして処理→システム停止
                 if before_run_pump_value >= after_run_pump_value:
+                    log_soil_data(f"水瓶に水が入っていない可能性があります。"
+                          f" before={before_run_pump_value}, after={after_run_pump_value}, ", value, voltage)
                     print(f"水瓶に水が入っていない可能性があります。"
                           f" before={before_run_pump_value}, after={after_run_pump_value}, ") 
 
