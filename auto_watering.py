@@ -69,13 +69,13 @@ def log_error(error_type, error_message, traceback_str=""):
     
     # エラーログエントリ
     error_entry = f"""{'='*60}
-[ERROR] {now.strftime('%Y-%m-%d %H:%M:%S')}
-エラータイプ: {error_type}
-エラー内容: {error_message}
-{traceback_str}
-{'='*60}
+    [ERROR] {now.strftime('%Y-%m-%d %H:%M:%S')}
+    エラータイプ: {error_type}
+    エラー内容: {error_message}
+    {traceback_str}
+    {'='*60}
 
-"""
+    """
     
     # ファイルに追記
     with open(error_log_file, "a", encoding="utf-8") as f:
@@ -145,12 +145,13 @@ try:
 
                 # 水がポンプから送られたか確認をするために５秒待ち
                 print("水が浸透しているのを待っています。")
-                time.sleep(5)
+                time.sleep(60)
                 # 最新のセンサー値を取得
                 after_run_pump_value = soil.value
                 # 水瓶に水が入っていない場合はエラーとして処理→システム停止
                 if before_run_pump_value >= after_run_pump_value:
-                    raise ValueError("水瓶に水が入っていない可能性があります。") 
+                    print(f"水瓶に水が入っていない可能性があります。"
+                          f" before={before_run_pump_value}, after={after_run_pump_value}, ") 
 
                 print("ポンプOFF、給水後待機中")
                 time.sleep(WAIT_AFTER_WATER)
