@@ -15,11 +15,11 @@ from adafruit_ads1x15.analog_in import AnalogIn
 # 設定値
 # =========================
 
-DRY_THRESHOLD = 19000    # 乾燥判定しきい値
+DRY_THRESHOLD = 18500    # 乾燥判定しきい値
 PUMP_ON_SEC = 3         # ポンプ動作時間（秒）
 WAIT_AFTER_WATER = 300    # 給水後の待機時間（秒）
 LOOP_INTERVAL = 600        # 通常ループ間隔（秒）
-LOG_INTERVAL = 1       # ログ記録間隔（秒）
+LOG_INTERVAL = 5       # ログ記録間隔（秒）
 
 # Low Level Trigger リレー用
 RELAY_GPIO = 4          # リレー制御GPIO（BCM番号）
@@ -137,6 +137,7 @@ try:
                 else:
                     print(f"ログ📙:土壌が湿っています------value:{value}")
                     log_soil_data(f"ログ📙:土壌が湿っています------value:{value}", value, voltage)
+            time.sleep(LOG_INTERVAL)
             # ===========================================================================
         
         except Exception as e:
