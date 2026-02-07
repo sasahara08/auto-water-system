@@ -128,15 +128,17 @@ try:
 
             print(f"土壌センサー: raw={value} voltage={voltage:.3f}V")
 
-            # 10分ごとにログ記録
+            # LOG_INTERVAL分ごとにログ記録==============================================
             if current_time - last_log_time >= LOG_INTERVAL:
                 last_log_time = current_time
                 if value > DRY_THRESHOLD:
                     print(f"ログ📙:土壌が乾燥しています------value:{value}")
-                    log_soil_data("土壌が乾燥 -> ポンプON", value, voltage)
+                    log_soil_data(f"ログ📙:土壌が乾燥しています------value:{value}")
                 else:
                     print(f"ログ📙:土壌が湿っています------value:{value}")
-                    log_soil_data("水やり不要", value, voltage)
+                    log_soil_data(f"ログ📙:土壌が湿っています------value:{value}")
+                time.sleep(LOG_INTERVAL)
+            # ===========================================================================
 
             if value > DRY_THRESHOLD:
                 print("土壌が乾燥 -> ポンプON")
@@ -149,7 +151,7 @@ try:
                 time.sleep(PUMP_ON_SEC)
                 relay_request.set_value(RELAY_GPIO, RELAY_OFF)
 
-                # 水がポンプから送られたか確認をするために５秒待ち
+                # 水がポンプから送られたか確認をするために数秒待ち
                 print("水が浸透しているのを待っています。")
                 time.sleep(60)
                 # 最新のセンサー値を取得
@@ -168,6 +170,7 @@ try:
                 log_soil_data('水やり不要', value, voltage)
                 relay_request.set_value(RELAY_GPIO, RELAY_OFF)
                 time.sleep(LOOP_INTERVAL)
+                continue
         
         except (IOError, OSError) as e:
             # センサーやGPIOのエラー
