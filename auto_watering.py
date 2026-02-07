@@ -152,16 +152,16 @@ try:
                 relay_request.set_value(RELAY_GPIO, RELAY_OFF)
 
                 # 水がポンプから送られたか確認をするために数秒待ち
-                print("水が浸透しているのを待っています。")
-                time.sleep(60)
+                # print("水が浸透しているのを待っています。")
+                # time.sleep(60)
                 # 最新のセンサー値を取得
-                after_run_pump_value = soil.value
+                # after_run_pump_value = soil.value
                 # 水瓶に水が入っていない場合はエラーとして処理→システム停止
-                if before_run_pump_value >= after_run_pump_value:
-                    log_soil_data(f"水瓶に水が入っていない可能性があります。"
-                          f" before={before_run_pump_value}, after={after_run_pump_value}, ", value, voltage)
-                    print(f"水瓶に水が入っていない可能性があります。"
-                          f" before={before_run_pump_value}, after={after_run_pump_value}, ") 
+                # if before_run_pump_value >= after_run_pump_value:
+                #     log_soil_data(f"水瓶に水が入っていない可能性があります。"
+                #           f" before={before_run_pump_value}, after={after_run_pump_value}, ", value, voltage)
+                #     print(f"水瓶に水が入っていない可能性があります。"
+                #           f" before={before_run_pump_value}, after={after_run_pump_value}, ") 
 
                 print("ポンプOFF、給水後待機中")
                 time.sleep(WAIT_AFTER_WATER)
