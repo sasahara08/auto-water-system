@@ -133,10 +133,10 @@ try:
                 last_log_time = current_time
                 if value > DRY_THRESHOLD:
                     print(f"ログ📙:土壌が乾燥しています------value:{value}")
-                    log_soil_data(f"ログ📙:土壌が乾燥しています------value:{value}")
+                    log_soil_data(f"ログ📙:土壌が乾燥しています------value:{value}", value, voltage)
                 else:
                     print(f"ログ📙:土壌が湿っています------value:{value}")
-                    log_soil_data(f"ログ📙:土壌が湿っています------value:{value}")
+                    log_soil_data(f"ログ📙:土壌が湿っています------value:{value}", value, voltage)
                 time.sleep(LOG_INTERVAL)
             # ===========================================================================
 
