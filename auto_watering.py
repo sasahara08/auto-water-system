@@ -164,7 +164,7 @@ try:
             # 最新のセンサー値を取得
             after_run_pump_value = soil.value
             # 水瓶に水が入っていない場合はエラーとしてログを記録
-            if before_run_pump_value >= after_run_pump_value:
+            if before_run_pump_value <= after_run_pump_value:
                 log_soil_data(f"水瓶に水が入っていない可能性があります。"
                           f" before={before_run_pump_value}, after={after_run_pump_value}, ", value, voltage)
                 print(f"水瓶に水が入っていない可能性があります。"
