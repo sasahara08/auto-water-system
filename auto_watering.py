@@ -29,6 +29,9 @@ RELAY_OFF = gpiod.line.Value.ACTIVE   # 1
 # ログディレクトリのベースパス
 LOG_BASE_DIR = Path(__file__).parent / "log"
 
+# Prometheusが取得するファイル(通知のトリガー設定)
+PROM_FILE_PATH = "/srv/auto-water-system/water_status.prom"
+
 
 # =========================
 # ログ記録関数
@@ -141,6 +144,8 @@ try:
         if value > DRY_THRESHOLD:
             print("土壌が乾燥 -> ポンプON")
             log_soil_data("土壌が乾燥 -> ポンプON", value, voltage)
+            with open(PROM_FILE_PATH, "w") as f:
+                f.write('watering_active_flag 1\n')
             # ポンプ動作後の湿度と比較するために、動作前に値を検証
             before_run_pump_value = value
 
@@ -159,19 +164,19 @@ try:
                 log_soil_data(f"水瓶に水が入っていない可能性があります。"
                           f" before={before_run_pump_value}, after={after_run_pump_value}, ", value, voltage)
                 print(f"水瓶に水が入っていない可能性があります。"
-                          f" before={before_run_pump_value}, after={after_run_pump_value}, ") 
-
-            print("ポンプOFF、給水後待機中")
+                          f" before={before_run_pump_value}, after={after_run_pump_value}, ")
+                with open(PROM_FILE_PATH, "w") as f:
+                    f.write('water_empty_alert 1\n')
+            else:
+                with open(PROM_FILE_PATH, "w") as f:
+                    f.write('water_empty_alert 0\n') 
         else:
             print("水やり不要 -> ポンプOFF")
             log_soil_data('水やり不要', value, voltage)
             relay_request.set_value(RELAY_GPIO, RELAY_OFF)
-    
-        # クリーンアップ
-        print("クリーンアップ中...")
-        relay_request.set_value(RELAY_GPIO, RELAY_OFF)
-        relay_request.release()
-        print("クリーンアップ完了")
+            with open(PROM_FILE_PATH, "w") as f:
+                f.write('watering_active_flag 0\n')
+                f.write('water_empty_alert 0\n')
         
 except (IOError, OSError) as e:
     # センサーやGPIOのエラー
@@ -180,6 +185,8 @@ except (IOError, OSError) as e:
     log_error("I/Oエラー", str(e), tb_str)
     print(f"I/Oエラー発生: {e}")
     print("エラーログに記録しました。システムを停止します。")
+    with open(PROM_FILE_PATH, "w") as f:
+        f.write('water_error_alert 1\n')
         
 except Exception as e:
     # その他の予期しないエラー
@@ -188,7 +195,18 @@ except Exception as e:
     log_error(type(e).__name__, str(e), tb_str)
     print(f"エラー発生: {type(e).__name__}: {e}")
     print("エラーログに記録しました。システムを停止します。")
+    with open(PROM_FILE_PATH, "w") as f:
+        f.write('water_error_alert 1\n')
 
 except Exception as e:
     log_error(type(e).__name__, str(e), tb_str)
     print(f"クリーンアップ中にエラー: {e}")
+    with open(PROM_FILE_PATH, "w") as f:
+        f.write('water_error_alert 1\n')
+
+finally:
+    # クリーンアップ
+    print("クリーンアップ中...")
+    relay_request.set_value(RELAY_GPIO, RELAY_OFF)
+    relay_request.release()
+    print("クリーンアップ完了")
