@@ -145,7 +145,7 @@ try:
             print("土壌が乾燥 -> ポンプON")
             log_soil_data("土壌が乾燥 -> ポンプON", value, voltage)
             with open(PROM_FILE_PATH, "w") as f:
-                f.write('watering_active_flag 1\n')
+                f.write('watering_active_alert 1\n')
             # ポンプ動作後の湿度と比較するために、動作前に値を検証
             before_run_pump_value = value
 
@@ -175,7 +175,7 @@ try:
             log_soil_data('水やり不要', value, voltage)
             relay_request.set_value(RELAY_GPIO, RELAY_OFF)
             with open(PROM_FILE_PATH, "w") as f:
-                f.write('watering_active_flag 0\n')
+                f.write('watering_active_alert 0\n')
                 f.write('water_empty_alert 0\n')
         
 except (IOError, OSError) as e:
