@@ -86,6 +86,13 @@ def log_error(error_type, error_message, traceback_str=""):
     
     print(f"エラーログ記録: {error_log_file}")
 
+# prometheus用のファイル更新関数
+def update_prom_file(active=0, empty=0, error=0):
+    with open(PROM_FILE_PATH, "w") as f:
+        f.write(f'watering_active_alert {active}\n')
+        f.write(f'water_empty_alert {empty}\n')
+        f.write(f'water_error_alert {error}\n')
+
 
 # =========================
 # GPIO 初期化（libgpiod V2）
@@ -128,10 +135,7 @@ try:
         has_water = 0
 
         print(f"土壌センサー: raw={value} voltage={voltage:.3f}V")
-        with open(PROM_FILE_PATH, "w") as f:
-            f.write('watering_active_alert 0\n')
-            f.write('water_empty_alert 0\n')
-            f.write('water_error_alert 0\n')
+        update_prom_file(0,0,0)
 
         # LOG_INTERVAL分ごとにログ記録:systemd timer導入により廃止==================
         # if current_time - last_log_time >= LOG_INTERVAL:
@@ -148,8 +152,7 @@ try:
         if value > DRY_THRESHOLD:
             print("土壌が乾燥 -> ポンプON")
             log_soil_data("土壌が乾燥 -> ポンプON", value, voltage)
-            with open(PROM_FILE_PATH, "w") as f:
-                f.write('watering_active_alert 1\n')
+            update_prom_file(active=1)
             # ポンプ動作後の湿度と比較するために、動作前に値を検証
             before_run_pump_value = value
 
@@ -169,18 +172,14 @@ try:
                           f" before={before_run_pump_value}, after={after_run_pump_value}, ", value, voltage)
                 print(f"水瓶に水が入っていない可能性があります。"
                           f" before={before_run_pump_value}, after={after_run_pump_value}, ")
-                with open(PROM_FILE_PATH, "w") as f:
-                    f.write('water_empty_alert 1\n')
+                update_prom_file(active=1, empty=1)
             else:
-                with open(PROM_FILE_PATH, "w") as f:
-                    f.write('water_empty_alert 0\n') 
+                update_prom_file(active=1, empty=0) 
         else:
             print("水やり不要 -> ポンプOFF")
             log_soil_data('水やり不要', value, voltage)
             relay_request.set_value(RELAY_GPIO, RELAY_OFF)
-            with open(PROM_FILE_PATH, "w") as f:
-                f.write('watering_active_alert 0\n')
-                f.write('water_empty_alert 0\n')
+            update_prom_file(active=0, empty=0)    
         
 except (IOError, OSError) as e:
     # センサーやGPIOのエラー
@@ -189,8 +188,7 @@ except (IOError, OSError) as e:
     log_error("I/Oエラー", str(e), tb_str)
     print(f"I/Oエラー発生: {e}")
     print("エラーログに記録しました。システムを停止します。")
-    with open(PROM_FILE_PATH, "w") as f:
-        f.write('water_error_alert 1\n')
+    update_prom_file(active=0, empty=0, error=1)
         
 except Exception as e:
     # その他の予期しないエラー
@@ -199,14 +197,12 @@ except Exception as e:
     log_error(type(e).__name__, str(e), tb_str)
     print(f"エラー発生: {type(e).__name__}: {e}")
     print("エラーログに記録しました。システムを停止します。")
-    with open(PROM_FILE_PATH, "w") as f:
-        f.write('water_error_alert 1\n')
+    update_prom_file(active=0, empty=0, error=1)
 
 except Exception as e:
     log_error(type(e).__name__, str(e), tb_str)
     print(f"クリーンアップ中にエラー: {e}")
-    with open(PROM_FILE_PATH, "w") as f:
-        f.write('water_error_alert 1\n')
+    update_prom_file(active=0, empty=0, error=1)
 
 finally:
     # クリーンアップ
