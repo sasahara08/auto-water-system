@@ -88,10 +88,14 @@ def log_error(error_type, error_message, traceback_str=""):
 
 # prometheus用のファイル更新関数
 def update_prom_file(active=0, empty=0, error=0):
-    with open(PROM_FILE_PATH, "w") as f:
-        f.write(f'watering_active_alert {active}\n')
-        f.write(f'water_empty_alert {empty}\n')
-        f.write(f'water_error_alert {error}\n')
+    tmp = PROM_FILE_PATH + ".tmp"
+
+    with open(tmp, "w") as f:
+        f.write(f"watering_active_alert {active}\n")
+        f.write(f"water_empty_alert {empty}\n")
+        f.write(f"water_error_alert {error}\n")
+
+    os.replace(tmp, PROM_FILE_PATH)
 
 
 # =========================
@@ -135,7 +139,6 @@ try:
         has_water = 0
 
         print(f"土壌センサー: raw={value} voltage={voltage:.3f}V")
-        update_prom_file(0,0,0)
 
         # LOG_INTERVAL分ごとにログ記録:systemd timer導入により廃止==================
         # if current_time - last_log_time >= LOG_INTERVAL:
@@ -199,14 +202,18 @@ except Exception as e:
     print("エラーログに記録しました。システムを停止します。")
     update_prom_file(active=0, empty=0, error=1)
 
-except Exception as e:
-    log_error(type(e).__name__, str(e), tb_str)
-    print(f"クリーンアップ中にエラー: {e}")
-    update_prom_file(active=0, empty=0, error=1)
-
 finally:
     # クリーンアップ
     print("クリーンアップ中...")
-    relay_request.set_value(RELAY_GPIO, RELAY_OFF)
-    relay_request.release()
-    print("クリーンアップ完了")
+    # 通知用に初期化、通知のチェックインターバルが10秒の為、少し待ってから初期化
+    try:
+        time.sleep(20)
+        update_prom_file(active=0, empty=0, error=0)
+        relay_request.set_value(RELAY_GPIO, RELAY_OFF)
+        relay_request.release()
+        print("クリーンアップ完了")
+    except Exception as e:
+        log_error(type(e).__name__, str(e), tb_str)
+        print(f"クリーンアップ中にエラー: {e}")
+        update_prom_file(active=0, empty=0, error=1)
+    
