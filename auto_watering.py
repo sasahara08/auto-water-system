@@ -128,6 +128,10 @@ try:
         has_water = 0
 
         print(f"土壌センサー: raw={value} voltage={voltage:.3f}V")
+        with open(PROM_FILE_PATH, "w") as f:
+            f.write('watering_active_alert 0\n')
+            f.write('water_empty_alert 0\n')
+            f.write('water_error_alert 0\n')
 
         # LOG_INTERVAL分ごとにログ記録:systemd timer導入により廃止==================
         # if current_time - last_log_time >= LOG_INTERVAL:
